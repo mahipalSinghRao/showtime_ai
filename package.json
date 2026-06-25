@@ -1,0 +1,26 @@
+{
+  "name": "showtime-ai-backend",
+  "version": "1.0.0",
+  "description": "Production-grade AI powered movie platform backend",
+  "private": true,
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "express",
+    "mongodb",
+    "jwt",
+    "redis",
+    "openai"
+  ],
+  "author": "Mahipal Singh",
+  "license": "MIT"
+}
