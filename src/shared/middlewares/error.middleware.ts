@@ -1,29 +1,41 @@
 import { NextFunction, Request, Response } from "express"
 import { AppError } from "../errors/AppError"
 import { env } from "../../config/env";
+import ApiError from "../errors/ApiError";
+import { ZodError } from "zod";
+
 
 const errMiddleware = (
-    error: Error,
+    err: Error,
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    let statusCode = 500;
-    let message = "Internal Server Error";
-    if (error instanceof AppError) {
-        statusCode = error.statusCode;
-        message = error.message
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json({
+            success: false,
+            message: err.message,
+            errors: err.errors,
+            stack:
+                env.NODE_ENV === "production" ? err.stack : undefined
+        })
+    } else if (err instanceof ZodError) {
+        return res.status(400).json({
+            success: false,
+            message: "Validation Failed",
+            errors: err.issues,
+        });
+    } else {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            stack: env.NODE_ENV === "development"
+                ? err.stack
+                : undefined,
+        })
     }
 
-    res.status(statusCode).json({
-        success: false,
-        statusCode,
-        message,
-        error: [],
-        stack:
-            process.env.NODE_ENV === "development"
-                ? error.stack
-                : undefined,
-    });
+
+
 }
 export default errMiddleware;

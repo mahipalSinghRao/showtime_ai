@@ -1,8 +1,8 @@
-import { IUser } from "./user.types";
 import { User } from "./user.model";
+import { CreateUserDto } from "./user.types";
 
 class UserRepository {
-    async create(data: Partial<IUser>) {
+    async create(data: CreateUserDto) {
         return User.create(data)
     }
     async findById(id: string) {
@@ -13,9 +13,9 @@ class UserRepository {
             email
         }).select("+password +refreshToken")
     }
-    async findByUserName(userName: string) {
+    async findByUserName(username: string) {
         return User.findOne({
-            userName
+            username
         })
     }
     async updateRefreshToken(userId: string, refreshToken: string) {
@@ -28,6 +28,18 @@ class UserRepository {
                 refreshToken: "",
             }
         );
+    }
+
+    async updateLastLogin(userId: string) {
+        return User.findByIdAndUpdate(userId, { lastLogin: new Date() }, { new: true })
+    }
+
+    async existsByEmail(email: string) {
+        return User.exists({ email })
+    }
+
+    async existsByUserName(username: string) {
+        return User.exists({ username })
     }
 };
 
