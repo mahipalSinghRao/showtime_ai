@@ -1,5 +1,5 @@
 import { User } from "./user.model";
-import { CreateUserDto } from "./user.types";
+import { CreateUserDto, UpdateUserDto } from "./user.types";
 
 class UserRepository {
     async create(data: CreateUserDto) {
@@ -12,6 +12,12 @@ class UserRepository {
         return User.findOne({
             email
         }).select("+password +refreshToken")
+    }
+    async updateProfile(userId: string, data: UpdateUserDto) {
+        return User.findByIdAndUpdate(userId, data, {
+            new: true,
+            runValidators: true
+        })
     }
     async findByUserName(username: string) {
         return User.findOne({

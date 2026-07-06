@@ -4,9 +4,8 @@ import { comparePassword, hashPassword } from "@/shared/utils/password";
 import { toPublicUser } from "@/shared/utils/user";
 import ApiError from "@/shared/errors/ApiError";
 import { generateAuthTokens } from "@/shared/utils/auth";
-import { AuthTokens, LoginResponse, LoginUserDto } from "./auth.types";
+import { LoginUserDto } from "./auth.types";
 import { verifyRefreshToken } from "@/shared/utils/jwt";
-
 
 
 class AuthService {
@@ -87,6 +86,15 @@ class AuthService {
         const payload = verifyRefreshToken(refreshToken);
         await userRepository.clearRefreshToken(payload.userId);
         return;
+    }
+
+    async getMe(userId: string) {
+        const user = await userRepository.findById(userId)
+        console.info(user)
+        if (!user) {
+            throw new ApiError(401, "Unauthorized");
+        }
+        return user;
     }
 }
 export default new AuthService()

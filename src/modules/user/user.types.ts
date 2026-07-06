@@ -1,11 +1,6 @@
 import { HydratedDocument } from "mongoose";
 import { UserRole } from "@/shared/constants/roles";
 
-// export enum userRole {
-//     USER = "USER",
-//     ADMIN = "ADMIN"
-// }
-
 export interface IUser {
     fullName: string;
     username: string;
