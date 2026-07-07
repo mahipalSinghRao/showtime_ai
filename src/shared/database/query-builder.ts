@@ -1,6 +1,6 @@
 import { Query } from "mongoose";
 import { PaginationQuery } from "../types/pagination.types";
-import { getPagination } from "../utils/pagination";
+import { getPagination } from "../../shared/utils/pagination";
 
 export class QueryBuilder<T> {
 
@@ -43,7 +43,7 @@ export class QueryBuilder<T> {
         if (!sortField) {
             return this;
         }
-        if (!allowedFields.includes(sortField)) {
+        if (!allowedFields.includes(sortField as keyof T)) {
             return this;
         }
         this.query.sort({ [sortField]: -1 })

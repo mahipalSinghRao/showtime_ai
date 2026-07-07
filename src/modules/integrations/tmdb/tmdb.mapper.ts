@@ -9,7 +9,7 @@ export const mapTmdbMovieToMovie = (movie: TmdbMovie): CreateMovieDto => {
         posterPath: movie.poster_path,
         releaseDate: new Date(),
         genres: [],
-        language: "",
+        originalLanguage: movie.original_language,
         runtime: 1,
         slug: movie.title
             .toLowerCase()

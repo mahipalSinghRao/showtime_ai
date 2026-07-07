@@ -5,6 +5,7 @@ import { getPagination, getPaginationMeta } from "@/shared/utils/pagination";
 import { QueryBuilder } from "@/shared/database/query-builder";
 import { Review } from "../reviews/review.model";
 import { Types } from "mongoose";
+import { ParsedPrompt } from "../ai/ai.types";
 
 class MovieRepository {
     async createMany(data: CreateMovieDto[]) {
@@ -24,9 +25,11 @@ class MovieRepository {
     }
 
     async findAll(query: PaginationQuery) {
+        // console.log("Repository started");
         const builder = new QueryBuilder<IMovie>(Movie.find(), query)
+        console.log("Builder created");
         const movies = await builder.search(["title", "overview"]).filter([
-            "language",
+            "originalLanguage",
             "genres",
             "isFeatured",
             "isTrending"
@@ -38,6 +41,7 @@ class MovieRepository {
         ]).paginate().build()
         const total = await Movie.countDocuments(builder.getFilter())
         const { page, limit } = getPagination(query);
+        // console.log("Movies fetched");
         return { movies, pagination: getPaginationMeta(page, limit, total) }
     }
 
@@ -126,6 +130,37 @@ class MovieRepository {
             }
         );
 
+    }
+
+    async searchForAI(filters: ParsedPrompt) {
+        const query: any = {};
+        if (filters.genres?.length) {
+            query.genres = {
+                $in: filters.genres
+            };
+        }
+        if (filters.language) {
+            query.language = filters.language;
+        }
+        if (filters.year) {
+            query.releaseDate = {
+                $gte: new Date(`${filters.year}-01-01`),
+                $lte: new Date(`${filters.year}-12-31`)
+            };
+
+        }
+        if (filters.keywords?.length) {
+            query.$or = filters.keywords.map(keyword => ({
+                overview: {
+                    $regex: keyword,
+                    $options: "i"
+                }
+            }));
+        }
+
+        return Movie.find(query)
+            .select("title overview genres voteAverage releaseDate posterPath")
+            .limit(10);
     }
 }
 

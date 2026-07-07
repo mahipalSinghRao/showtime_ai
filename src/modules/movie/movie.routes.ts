@@ -6,6 +6,26 @@ import { movieQuerySchema } from "./movie.validator";
 
 const router = Router()
 
+/**
+ * @swagger
+ *
+ * /movies:
+ *
+ *   get:
+ *
+ *     summary: Get Movies
+ *
+ *     tags:
+ *
+ *       - Movies
+ *
+ *     responses:
+ *
+ *       200:
+ *
+ *         description: Movies fetched successfully
+ */
+
 router.get("/get", movieController.syncMovies)
 router.get("/", validate(movieQuerySchema), movieController.getMovies);
 router.get("/stats", movieController.getStats);
@@ -15,3 +35,4 @@ router.get("/:id/similar", movieController.getSimilarMovies);
 router.get("/:id", movieController.getMovieById);
 
 export default router;
+

@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express"
-import { AppError } from "../errors/AppError"
 import { env } from "../../config/env";
 import ApiError from "../errors/ApiError";
 import { ZodError } from "zod";
@@ -7,9 +6,9 @@ import { ZodError } from "zod";
 
 const errMiddleware = (
     err: Error,
-    req: Request,
+    _req: Request,
     res: Response,
-    next: NextFunction
+    _next: NextFunction
 ) => {
     if (err instanceof ApiError) {
         return res.status(err.statusCode).json({
@@ -26,13 +25,13 @@ const errMiddleware = (
             errors: err.issues,
         });
     } else {
+        console.error("Unhandled Error:", err);
+
         return res.status(500).json({
             success: false,
-            message: "Internal Server Error",
-            stack: env.NODE_ENV === "development"
-                ? err.stack
-                : undefined,
-        })
+            message: err.message,
+            stack: err.stack,
+        });
     }
 
 

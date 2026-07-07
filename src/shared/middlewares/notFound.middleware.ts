@@ -3,13 +3,13 @@ import { AppError } from "../errors/AppError";
 
 const notFoundMiddleware = (
     req: Request,
-    res: Response,
+    _res: Response,
     next: NextFunction
 ) => {
     next(
         new AppError(
-            404,
-            `Route ${req.originalUrl} not found`
+            `Route ${req.originalUrl} not found`,
+            404
         )
     );
 }

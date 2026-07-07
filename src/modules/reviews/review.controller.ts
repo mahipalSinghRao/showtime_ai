@@ -18,7 +18,7 @@ class ReviewController {
     })
 
     getMovieReviews = asyncHandler(async (req, res) => {
-        const { movieId } = req.params;
+        const movieId = req.params.id as string
         const result = await reviewService.getMovieReviews(movieId);
         return res.status(200).json(
             new ApiResponse(
@@ -33,7 +33,7 @@ class ReviewController {
     updateReview = asyncHandler(async (req, res) => {
         const result =
             await reviewService.updateReview(
-                req.params.id,
+                req.params.id as string,
                 req.user.userId,
                 req.body
             );

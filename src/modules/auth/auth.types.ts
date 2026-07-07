@@ -1,5 +1,5 @@
 import { UserRole } from "@/shared/constants/roles";
-import { PublicUser } from "@/user/user.types";
+import { PublicUser } from "../user/user.types";
 
 // export interface CreateUserDto {
 //     fullName: string;

@@ -16,5 +16,9 @@ export const env = {
 
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
 
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+
+    OLLAMA_URL: process.env.OLLAMA_URL || "",
+
     TMDB_API_KEY: process.env.TMDB_API_KEY || "",
 }

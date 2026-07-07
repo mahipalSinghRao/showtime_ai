@@ -1,12 +1,13 @@
 import asyncHandler from "@/shared/utils/asyncHandler";
 import watchlistService from "./watchlist.service";
 import ApiResponse from "@/shared/utils/ApiResponse";
+import { Types } from "mongoose";
 
 class WatchlistController {
     createWatchlist = asyncHandler(async (req, res) => {
         const result = await watchlistService.addToWatchlist({
             movie: req.body.movie,
-            user: req.user.userId
+            user: new Types.ObjectId(req.user.userId)
         })
         return res.status(201).json(
             new ApiResponse(
@@ -32,7 +33,7 @@ class WatchlistController {
 
         await watchlistService.removeFromWatchlist(
             req.user.userId,
-            req.params.movieId
+            req.params.movieId as string
         );
         return res.status(200).json(
             new ApiResponse(

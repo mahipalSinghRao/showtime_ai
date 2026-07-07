@@ -1,26 +1,34 @@
 import asyncHandler from "@/shared/utils/asyncHandler";
 import ApiResponse from "@/shared/utils/ApiResponse";
 import movieService from "./movie.service";
+import { getMovieQueue } from "@/jobs/queues/movie.queue";
+import { PaginationQuery } from "@/shared/types/pagination.types";
 
 class MovieController {
-    syncMovies = asyncHandler(async (req, res) => {
-        const result = await movieService.syncMovies()
-        return res.status(200).json(
+    syncMovies = asyncHandler(async (_req, res) => {
+        // console.log("Controller reached");
+        await getMovieQueue().add("sync", {
+            jobId: "movie-sync", attempts: 3,
+            backoff: {
+                type: "exponential",
+                delay: 3000
+            }
+        })
+        // console.log("Service returned");
+        return res.status(202).json(
             new ApiResponse(
-                200,
-                "Movie data fetched successfully",
-                result
+                202,
+                "Movie sync started",
+                null
             )
         );
     })
 
     getMovies = asyncHandler(async (req, res) => {
 
-        const result = await movieService.getMovie({
-            page: Number(req.query.page),
-            limit: Number(req.query.limit),
-
-        });
+        const result = await movieService.getMovie(
+            req.query as PaginationQuery
+        );
         return res.status(200).json(
             new ApiResponse(
                 200,
@@ -31,7 +39,7 @@ class MovieController {
     })
 
     getMovieById = asyncHandler(async (req, res) => {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const result = await movieService.getMovieById(id)
         return res.status(200).json(
             new ApiResponse(
@@ -42,7 +50,7 @@ class MovieController {
         );
     })
 
-    getStats = asyncHandler(async (req, res) => {
+    getStats = asyncHandler(async (_req, res) => {
         const result = await movieService.getStats();
         return res.status(200).json(
             new ApiResponse(
@@ -53,7 +61,7 @@ class MovieController {
         );
     })
 
-    getFeaturedMovies = asyncHandler(async (req, res) => {
+    getFeaturedMovies = asyncHandler(async (_req, res) => {
         const result = await movieService.getFeaturedMovies()
         return res.status(200).json(
             new ApiResponse(
@@ -64,7 +72,7 @@ class MovieController {
         );
     })
 
-    getTrendingMovies = asyncHandler(async (req, res) => {
+    getTrendingMovies = asyncHandler(async (_req, res) => {
 
         const result =
             await movieService.getTrendingMovies();
@@ -79,9 +87,8 @@ class MovieController {
     });
 
     getSimilarMovies = asyncHandler(async (req, res) => {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const result = await movieService.getSimilarMovies(id)
-        // console.log(result.length);
         return res.status(200).json(
             new ApiResponse(
                 200,

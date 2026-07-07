@@ -7,6 +7,7 @@ class UserController {
         const id = req.user.userId;
         const result = await userService.updatedProfile(id, req.body)
 
+
         return res.status(200).json(
             new ApiResponse(
                 200,

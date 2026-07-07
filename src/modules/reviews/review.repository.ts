@@ -1,4 +1,4 @@
-import { Movie } from "../movie/movie.model";
+
 import { Review } from "./review.model";
 import { CreateReviewDto, UpdateReviewDto } from "./review.types";
 

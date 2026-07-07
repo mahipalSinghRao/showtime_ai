@@ -39,12 +39,35 @@ export interface IMovie {
 export interface CreateMovieDto {
     tmdbId: number;
     title: string;
+    overview: string;
     releaseDate: Date;
     genres: string[];
-    language: string;
-    overview: string;
-    poster: string;
+    originalLanguage: string;
+    posterPath: string;
     runtime: number;
+    slug: string;
+    isFeatured?: boolean;
+    isTrending?: boolean;
+    budget?: number;
+    revenue?: number;
+    productionCompanies?: string[];
+    tagline?: string;
+    homepage?: string;
+    imdbId?: string;
+    trailerKey?: string;
+    cast?: CastMember[];
+    crew?: CrewMember[];
+    keywords?: string[];
+    country?: string[];
+    originCountry?: string[];
+    popularity?: number;
+    voteAverage?: number;
+    voteCount?: number;
+    adult?: boolean;
+    status?: string;
+    backdropPath?: string;
+    originalTitle?: string;
+    video?: boolean;
 }
 
 export interface UpdateMovieDto {
@@ -52,7 +75,7 @@ export interface UpdateMovieDto {
     overview?: string;
     genres?: string[];
     runtime?: number;
-    poster?: string;
+    posterPath?: string;
 }
 
 interface CastMember {

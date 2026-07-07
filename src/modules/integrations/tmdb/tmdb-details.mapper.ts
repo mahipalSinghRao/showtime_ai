@@ -1,9 +1,9 @@
 import { CreateMovieDto } from "@/modules/movie/movie.types";
 
-export const mapTmdbDetailsToMovie = (movie: any): Partial<CreateMovieDto> => {
-
+export const mapTmdbDetailsToMovie = (
+    movie: any
+): Partial<CreateMovieDto> => {
     return {
-
         runtime: movie.runtime,
 
         budget: movie.budget,
@@ -35,19 +35,18 @@ export const mapTmdbDetailsToMovie = (movie: any): Partial<CreateMovieDto> => {
                 id: actor.id,
                 name: actor.name,
                 character: actor.character,
-                profilePath: actor.profile_path
+                profilePath: actor.profile_path,
             })),
 
         crew: movie.credits.crew
-            .filter((person: any) =>
-                person.job === "Director"
+            .filter(
+                (person: any) => person.job === "Director"
             )
             .map((director: any) => ({
                 id: director.id,
                 name: director.name,
                 job: director.job,
-                department: director.department
-            }))
+                department: director.department,
+            })),
     };
-
 };

@@ -4,8 +4,9 @@ import { mapTmdbMovieToMovie } from "../integrations/tmdb/tmdb.mapper";
 import movieRepository from "./movie.repository";
 import ApiError from "@/shared/errors/ApiError";
 import { PaginationQuery } from "@/shared/types/pagination.types";
-import { TmdbEndpoints } from "../integrations/tmdb/tmdb.constants";
 import { mapTmdbDetailsToMovie } from "../integrations/tmdb/tmdb-details.mapper";
+import cacheService from "@/shared/cache/cache.service";
+import { CreateMovieDto } from "./movie.types";
 
 class MovieServices {
     async syncMovies() {
@@ -17,55 +18,125 @@ class MovieServices {
             movies.results.map((movie) => tmdbService.getMovieDetails(movie.id))
         )
 
-        const mappedMovies = movies.results.map((movie, index) => ({
+        const mappedMovies: CreateMovieDto[] = movies.results.map((movie, index) => ({
             ...mapTmdbMovieToMovie(movie),
-            ...mapTmdbDetailsToMovie(detailedMovies[index])
+            ...mapTmdbDetailsToMovie(detailedMovies[index]),
+
+            isFeatured: index < 5,
+            isTrending: index < 10,
         }));
-        mappedMovies.forEach((movie, index) => {
 
-            if (index < 5) {
-                movie.isFeatured = true;
-            }
-            if (index < 10) {
-                movie.isTrending = true;
-            }
-        });
 
-        await movieRepository.createMany(mappedMovies)
+        await movieRepository.createMany(mappedMovies);
+
+        await Promise.all([
+            cacheService.deleteByPattern("movies:*"),
+            cacheService.deleteByPattern("movie:*")
+        ]);
 
         return mappedMovies;
     }
 
     async getMovie(query: PaginationQuery) {
-        return await movieRepository.findAll(query)
+        // console.log("Service started");
+        const cacheKey = `movies:${JSON.stringify(query)}`;
+        const cached = await cacheService.get(cacheKey)
+        // console.log("Cache checked");
+        if (cached) {
+            return cached;
+        }
+
+        const movies = await movieRepository.findAll(query);
+
+        await cacheService.set(
+            cacheKey,
+            movies,
+            300
+        );
+        // console.log("Repository returned");
+        return movies;
     }
 
     async getMovieById(id: string) {
+        const cacheKey = `movie:${id}`;
+        const cached = await cacheService.get(cacheKey);
+
+        if (cached) {
+            return cached;
+        }
         const movie = await movieRepository.findById(id)
         if (!movie) {
             throw new ApiError(
                 404,
-                "Movie not found",
-                null
+                "Movie not found"
             );
         }
+        await cacheService.set(
+            cacheKey,
+            movie,
+            300
+        );
         return movie;
     }
 
     async getStats() {
-        return movieRepository.getStats()
+        const cacheKey = "movies:stats";
+        const cached = await cacheService.get(cacheKey)
+        if (cached) {
+            return cached;
+        }
+        const stats = await movieRepository.getStats();
+        await cacheService.set(
+            cacheKey,
+            stats,
+            600
+        );
+        return stats;
     }
 
     async getFeaturedMovies() {
-        return movieRepository.findFeatured();
+        const cacheKey = "movies:featured";
+        const cached = await cacheService.get(cacheKey)
+        if (cached) {
+            return cached;
+        }
+        const featured = await movieRepository.findFeatured();
+        await cacheService.set(
+            cacheKey,
+            featured,
+            600
+        );
+        return featured;
     }
 
     async getTrendingMovies() {
-        return movieRepository.findTrending();
+        const cacheKey = "movies:trending";
+        const cached = await cacheService.get(cacheKey)
+        if (cached) {
+            return cached;
+        }
+        const tranding = await movieRepository.findTrending();
+        await cacheService.set(
+            cacheKey,
+            tranding,
+            600
+        );
+        return tranding;
     }
 
     async getSimilarMovies(id: string) {
-        return movieRepository.findSimilar(id);
+        const cacheKey = `movie:${id}:similar`;
+        const cached = await cacheService.get(cacheKey)
+        if (cached) {
+            return cached;
+        }
+        const similar = await movieRepository.findSimilar(id);
+        await cacheService.set(
+            cacheKey,
+            similar,
+            600
+        );
+        return similar;
     }
 }
 

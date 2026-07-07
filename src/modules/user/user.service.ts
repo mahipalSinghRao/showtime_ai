@@ -1,4 +1,4 @@
-import userRepository from "./user.repository.ts"
+import userRepository from "./user.repository"
 import ApiError from "@/shared/errors/ApiError"
 import { UpdateUserDto } from "./user.types.js"
 
