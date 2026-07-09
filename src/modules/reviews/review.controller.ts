@@ -1,13 +1,18 @@
 import asyncHandler from "@/shared/utils/asyncHandler";
 import reviewService from "./review.service";
 import ApiResponse from "@/shared/utils/ApiResponse";
+import { getRequestContext } from "@/shared/context/request-context";
 
 class ReviewController {
     createReview = asyncHandler(async (req, res) => {
-        const result = await reviewService.createReview({
-            ...req.body,
-            user: req.user.userId
-        });
+        const result =
+            await reviewService.createReview(
+                {
+                    ...req.body,
+                    user: req.user.userId,
+                },
+                getRequestContext(req)
+            );
         return res.status(201).json(
             new ApiResponse(
                 201,

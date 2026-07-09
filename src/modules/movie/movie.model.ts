@@ -12,7 +12,6 @@ const movieSchema = new Schema<IMovie>({
     tmdbId: {
         type: Number,
         required: true,
-        unique: true,
         index: true
     },
     title: {

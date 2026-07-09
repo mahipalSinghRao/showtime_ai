@@ -1,3 +1,4 @@
+import { getRequestContext } from "@/shared/context/request-context";
 import authService from "./auth.service";
 import ApiResponse from "@/shared/utils/ApiResponse";
 import asyncHandler from "@/shared/utils/asyncHandler";
@@ -8,7 +9,7 @@ class AuthController {
     register = asyncHandler(
         async (req, res) => {
             const result =
-                await authService.register(req.body);
+                await authService.register(req.body, getRequestContext(req));
 
             setRefreshTokenCookie(res, result.tokens.refreshToken)
 
@@ -26,7 +27,7 @@ class AuthController {
     );
 
     login = asyncHandler(async (req, res) => {
-        const result = await authService.login(req.body);
+        const result = await authService.login(req.body, getRequestContext(req));
 
         setRefreshTokenCookie(res, result.tokens.refreshToken)
 
@@ -44,8 +45,11 @@ class AuthController {
     )
 
     refreshToken = asyncHandler(async (req, res) => {
-        const refreshToken = req.cookies.refreshToken;
-        const result = await authService.refreshToken(refreshToken);
+        const refToken = req.cookies.refreshToken;
+        const result = await authService.refreshToken(
+            refToken,
+            getRequestContext(req)
+        );
         setRefreshTokenCookie(res, result.tokens.refreshToken);
         return res.status(200).json(
             new ApiResponse(
@@ -61,7 +65,7 @@ class AuthController {
 
     logout = asyncHandler(async (req, res) => {
         const refreshToken = req.cookies?.refreshToken;
-        await authService.logout(refreshToken)
+        await authService.logout(refreshToken, getRequestContext(req))
         clearCookieToken(res)
         return res.status(201).json(
             new ApiResponse(
@@ -84,6 +88,23 @@ class AuthController {
             )
         )
     })
+
+    logoutAll = asyncHandler(async (req, res) => {
+        await authService.logoutAll(
+            req.user.userId
+        );
+
+        clearCookieToken(res);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Logged out from all devices",
+                null
+            )
+        );
+
+    });
 }
 
 export default new AuthController();

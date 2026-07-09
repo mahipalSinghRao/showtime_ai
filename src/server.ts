@@ -1,6 +1,6 @@
-import app from "@/app";
+import app from "./app";
 import connectDB  from "@/config/database";
-import { env } from "@/config/env"
+import { env } from "./config/env"
 import { redisClient } from "./config/redis";
 import "@/jobs/workers/movie.worker";
 

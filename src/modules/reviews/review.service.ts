@@ -2,11 +2,19 @@ import ApiError from "@/shared/errors/ApiError";
 import movieRepository from "../movie/movie.repository";
 import reviewRepository from "./review.repository";
 import { CreateReviewDto, UpdateReviewDto } from "./review.types";
+import auditService from "../audit/audit.service";
+import { RequestContext } from "@/shared/context/request-context";
 
 class ReviewService {
-    async createReview(data: CreateReviewDto) {
-        const review = await reviewRepository.create(data)
-        await movieRepository.updateRating(data.movie.toString())
+    async createReview(data: CreateReviewDto, context?: RequestContext) {
+        const review = await reviewRepository.create(data);
+
+        await movieRepository.updateRating(data.movie.toString());
+        
+        await auditService.logReviewCreate(
+            true,
+            context
+        );
         return review
     }
 

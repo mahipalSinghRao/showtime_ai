@@ -1,32 +1,66 @@
+import logger from "@/config/logger";
 import movieRepository from "../movie/movie.repository";
-import { aiProvider } from "@/config/ai";
+import aiFactory from "./ai.factory";
 import { PARSE_PROMPT } from "./ai.prompts";
 import { RECOMMENDATION_PROMPT } from "./prompts/recommendation.prompt";
+import { parsedPromptSchema, recommendationSchema } from "./ai.validator";
+import { generateAICacheKey } from "./ai.cache";
+import cacheService from "@/shared/cache/cache.service";
+import auditService from "../audit/audit.service";
+import { RequestContext } from "@/shared/context/request-context";
 
 class AIServices {
+    private async chatWithFallback(
+        systemPrompt: string,
+        userPrompt: string
+    ): Promise<string> {
+        const providers = aiFactory.getFallbackChain();
+        let lastError: unknown;
 
-    async recommend(userPrompt: string) {
-        // STEP 1 - Parse user prompt
-        const parsedResponse = await aiProvider.chat(
-            PARSE_PROMPT,
-            userPrompt
-        );
+        for (const provider of providers) {
+            try {
+                logger.info(`Using AI Provider: ${provider.name}`);
+                return await provider.chat(
+                    systemPrompt,
+                    userPrompt
+                );
+            } catch (error) {
+                logger.warn(`${provider.name} failed. Trying next provider...`);
+                lastError = error;
+            }
+        }
+        throw lastError;
+    }
 
-        const filters = JSON.parse(parsedResponse);
+    async recommend(userPrompt: string, context?: RequestContext) {
+        const cacheKey = generateAICacheKey(userPrompt);
+
+        const cached = await cacheService.get(cacheKey);
+
+        if (cached) {
+            return cached;
+        }
+
+        const parsedResponse = await this.chatWithFallback(PARSE_PROMPT, userPrompt)
+
+        const filters = parsedPromptSchema.parse(JSON.parse(parsedResponse))
 
         const movies = await movieRepository.searchForAI(filters);
 
         const recommendation =
-            await aiProvider.chat(
+            await this.chatWithFallback(
                 RECOMMENDATION_PROMPT,
                 JSON.stringify({
                     request: userPrompt,
                     movies
                 })
-            );
+            )
 
         try {
-            return JSON.parse(recommendation);
+            const result = recommendationSchema.parse(JSON.parse(recommendation))
+            await cacheService.set(cacheKey, result, 3600)
+            await auditService.logAIRecommendation(true, context);
+            return result;
         }
         catch {
             throw new Error(

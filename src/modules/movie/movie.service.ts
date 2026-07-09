@@ -7,6 +7,7 @@ import { PaginationQuery } from "@/shared/types/pagination.types";
 import { mapTmdbDetailsToMovie } from "../integrations/tmdb/tmdb-details.mapper";
 import cacheService from "@/shared/cache/cache.service";
 import { CreateMovieDto } from "./movie.types";
+import auditService from "../audit/audit.service";
 
 class MovieServices {
     async syncMovies() {
@@ -33,6 +34,8 @@ class MovieServices {
             cacheService.deleteByPattern("movies:*"),
             cacheService.deleteByPattern("movie:*")
         ]);
+
+        await auditService.logMovieSync(true);
 
         return mappedMovies;
     }

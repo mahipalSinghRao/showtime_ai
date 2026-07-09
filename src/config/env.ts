@@ -20,5 +20,20 @@ export const env = {
 
     OLLAMA_URL: process.env.OLLAMA_URL || "",
 
+    AI_PROVIDER:
+        (process.env.AI_PROVIDER as
+            | "openai"
+            | "gemini"
+            | "ollama") ?? "gemini",
+
     TMDB_API_KEY: process.env.TMDB_API_KEY || "",
+
+    CLIENT_URL: process.env.CLIENT_URL || "",
+
+    DOMIN_URL: process.env.DOMIN_URL || "",
+
+    AUDIT_LOG_TTL: Number(
+        process.env.AUDIT_LOG_TTL ?? 7776000
+    ),
+
 }
