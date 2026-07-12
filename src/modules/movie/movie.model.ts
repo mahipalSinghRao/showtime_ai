@@ -12,7 +12,6 @@ const movieSchema = new Schema<IMovie>({
     tmdbId: {
         type: Number,
         required: true,
-        index: true
     },
     title: {
         type: String,
@@ -62,7 +61,7 @@ const movieSchema = new Schema<IMovie>({
         default: 0,
         min: 0
     },
-    slug: { type: String, unique: true, trim: true },
+    slug: { type: String, trim: true },
     isFeatured: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
     keywords: { type: [String], default: [] },

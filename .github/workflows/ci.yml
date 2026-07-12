@@ -16,6 +16,60 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+
+      mongodb:
+        image: mongo:8
+
+        ports:
+          - 27017:27017
+
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:8-alpine
+
+        ports:
+          - 6379:6379
+
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+
+      NODE_ENV: test
+
+      PORT: 5000
+
+      MONGODB_URI: mongodb://localhost:27017/showtime_test
+
+      REDIS_URL: redis://localhost:6379
+
+      JWT_ACCESS_SECRET: test_access_secret
+
+      JWT_REFRESH_SECRET: test_refresh_secret
+
+      OPENAI_API_KEY: test
+
+      GEMINI_API_KEY: test
+
+      TMDB_API_KEY: test
+
+      AI_PROVIDER: openai
+
+      CLIENT_URL: http://localhost:3000
+
+      DOMIN_URL: http://localhost:3000
+
+      AUDIT_LOG_TTL: 7776000
+
     steps:
 
       - name: Checkout Repository
