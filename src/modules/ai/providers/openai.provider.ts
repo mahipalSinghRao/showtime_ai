@@ -1,4 +1,4 @@
-import { openai } from "@/config/openai";
+import { getOpenAIClient } from "@/config/openai";
 import { AIProvider } from "./ai.provider";
 import AIProviderError from "../errors/AIProviderError";
 
@@ -11,20 +11,23 @@ export class OpenAIProvider implements AIProvider {
 
         try {
             const response =
-                await openai.chat.completions.create({
-                    model: "gpt-4.1-mini",
-                    messages: [
-                        {
-                            role: "system",
-                            content: systemPrompt
-                        },
+                await getOpenAIClient()
+                    .chat
+                    .completions
+                    .create({
+                        model: "gpt-4.1-mini",
+                        messages: [
+                            {
+                                role: "system",
+                                content: systemPrompt
+                            },
 
-                        {
-                            role: "user",
-                            content: userPrompt
-                        }
-                    ]
-                });
+                            {
+                                role: "user",
+                                content: userPrompt
+                            }
+                        ]
+                    });
 
             return response.choices[0].message.content ?? "";
         } catch (error) {

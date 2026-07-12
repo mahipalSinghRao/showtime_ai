@@ -12,3 +12,5 @@ Dockerfile
 README.md
 
 npm-debug.log
+
+logs/

@@ -12,60 +12,64 @@ export enum AIProviderType {
 
 class AIProviderFactory {
 
-    private readonly providers: Record<AIProviderType, AIProvider> = {
-        [AIProviderType.OPENAI]: new OpenAIProvider(),
-        [AIProviderType.GEMINI]: new GeminiProvider(),
-        [AIProviderType.OLLAMA]: new OllamaProvider(),
-    };
+    private createProvider(type: AIProviderType): AIProvider {
+
+        switch (type) {
+
+            case AIProviderType.OPENAI:
+                return new OpenAIProvider();
+
+            case AIProviderType.GEMINI:
+                return new GeminiProvider();
+
+            case AIProviderType.OLLAMA:
+                return new OllamaProvider();
+        }
+    }
 
     getProvider(provider?: AIProviderType): AIProvider {
 
-        const selected =
-            (provider ??
-                env.AI_PROVIDER) as AIProviderType;
-
-        return this.providers[selected];
+        return this.createProvider(
+            (provider ?? env.AI_PROVIDER) as AIProviderType
+        );
     }
 
     getFallbackChain(provider?: AIProviderType): AIProvider[] {
 
         const selected =
-            (provider ??
-                env.AI_PROVIDER) as AIProviderType;
+            (provider ?? env.AI_PROVIDER) as AIProviderType;
 
         switch (selected) {
 
             case AIProviderType.OPENAI:
                 return [
-                    this.providers.openai,
-                    this.providers.gemini,
-                    this.providers.ollama
+                    this.createProvider(AIProviderType.OPENAI),
+                    this.createProvider(AIProviderType.GEMINI),
+                    this.createProvider(AIProviderType.OLLAMA)
                 ];
 
             case AIProviderType.GEMINI:
                 return [
-                    this.providers.gemini,
-                    this.providers.openai,
-                    this.providers.ollama
+                    this.createProvider(AIProviderType.GEMINI),
+                    this.createProvider(AIProviderType.OPENAI),
+                    this.createProvider(AIProviderType.OLLAMA)
                 ];
 
             case AIProviderType.OLLAMA:
                 return [
-                    this.providers.ollama,
-                    this.providers.gemini,
-                    this.providers.openai
+                    this.createProvider(AIProviderType.OLLAMA),
+                    this.createProvider(AIProviderType.GEMINI),
+                    this.createProvider(AIProviderType.OPENAI)
                 ];
 
             default:
                 return [
-                    this.providers.gemini,
-                    this.providers.openai,
-                    this.providers.ollama
+                    this.createProvider(AIProviderType.GEMINI),
+                    this.createProvider(AIProviderType.OPENAI),
+                    this.createProvider(AIProviderType.OLLAMA)
                 ];
         }
-
     }
-
 }
 
 export default new AIProviderFactory();
