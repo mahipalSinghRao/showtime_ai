@@ -11,21 +11,31 @@ export class OllamaProvider implements AIProvider {
     ): Promise<string> {
 
         try {
-            const response =
-                await axios.post(
-                    `${OLLAMA_URL}/api/generate`,
-                    {
-                        model: "qwen3:4b",
-
-                        prompt:
-                            `${systemPrompt}\n\n${userPrompt}`,
-
-                        stream: false
-                    }
-                );
-
-            return response.data.response;
-        } catch (error) {
+            console.log("1");
+            const response = await axios.post(
+                `${OLLAMA_URL}/api/chat`,
+                {
+                    // model: "qwen3:4b",
+                    model: "llama3.2:3b",
+                    messages: [
+                        {
+                            role: "system",
+                            content: systemPrompt,
+                        },
+                        {
+                            role: "user",
+                            content: userPrompt,
+                        },
+                    ],
+                    stream: false,
+                },
+                {
+                    timeout: 120000,
+                }
+            );
+           
+            return response.data.message.content;
+        } catch (error: any) {
             throw new AIProviderError(
                 "Ollama",
                 error instanceof Error

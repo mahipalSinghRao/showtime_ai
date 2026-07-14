@@ -1,9 +1,10 @@
 import asyncHandler from "@/shared/utils/asyncHandler";
 import userService from "./user.service";
 import ApiResponse from "@/shared/utils/ApiResponse";
+import { Response, Request } from "express";
 
 class UserController {
-    updateProfile = asyncHandler(async (req, res) => {
+    updateProfile = asyncHandler(async (req: Request, res: Response) => {
         const id = req.user.userId;
         const result = await userService.updatedProfile(id, req.body)
 

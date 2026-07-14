@@ -9,16 +9,10 @@ export const parsedPromptSchema = z.object({
 })
 
 export const recommendationSchema = z.object({
-    title: z.string(),
-    reason: z.string(),
     recommendations: z.array(
         z.object({
             title: z.string(),
-            overview: z.string(),
-            genres: z.array(z.string()),
-            voteAverage: z.number(),
-            releaseDate: z.string().or(z.date()),
-            posterPath: z.string()
+            reason: z.string()
         })
     )
-})
+});

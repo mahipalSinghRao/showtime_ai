@@ -25,9 +25,9 @@ class MovieRepository {
     }
 
     async findAll(query: PaginationQuery) {
-        // console.log("Repository started");
+
         const builder = new QueryBuilder<IMovie>(Movie.find(), query)
-        console.log("Builder created");
+
         const movies = await builder.search(["title", "overview"]).filter([
             "originalLanguage",
             "genres",
@@ -41,7 +41,7 @@ class MovieRepository {
         ]).paginate().build()
         const total = await Movie.countDocuments(builder.getFilter())
         const { page, limit } = getPagination(query);
-        // console.log("Movies fetched");
+
         return { movies, pagination: getPaginationMeta(page, limit, total) }
     }
 
@@ -140,7 +140,7 @@ class MovieRepository {
             };
         }
         if (filters.language) {
-            query.language = filters.language;
+            query.originalLanguage = filters.language;
         }
         if (filters.year) {
             query.releaseDate = {

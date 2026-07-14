@@ -10,7 +10,7 @@ export class GeminiProvider implements AIProvider {
     ): Promise<string> {
         try {
             const response = await gemini.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3-flash-preview",
                 contents: `${systemPrompt}\n\n${userPrompt}`
             })
             return response.text ?? "";

@@ -76,8 +76,8 @@ const movieSchema = new Schema<IMovie>({
 }, { timestamps: true })
 
 movieSchema.index({
-    tmdbId: 1
-});
+    tmdbId: 1,
+}, { unique: true });
 
 movieSchema.index({
     slug: 1

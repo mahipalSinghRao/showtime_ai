@@ -9,6 +9,16 @@ import cacheService from "@/shared/cache/cache.service";
 import auditService from "../audit/audit.service";
 import { RequestContext } from "@/shared/context/request-context";
 
+export function extractJSON(text: string) {
+    const match = text.match(/\{[\s\S]*\}/);
+
+    if (!match) {
+        throw new Error("No JSON found");
+    }
+
+    return JSON.parse(match[0]);
+}
+
 class AIServices {
     private async chatWithFallback(
         systemPrompt: string,
@@ -27,6 +37,12 @@ class AIServices {
             } catch (error) {
                 logger.warn(`${provider.name} failed. Trying next provider...`);
                 lastError = error;
+                console.error(
+                    `[${provider.name}]`,
+                    error
+                );
+
+                lastError = error;
             }
         }
         throw lastError;
@@ -42,11 +58,27 @@ class AIServices {
         }
 
         const parsedResponse = await this.chatWithFallback(PARSE_PROMPT, userPrompt)
+     
+        const raw = extractJSON(parsedResponse);
 
-        const filters = parsedPromptSchema.parse(JSON.parse(parsedResponse))
+        const normalized = {
+            ...raw,
+            language: raw.language ?? undefined,
+            mood: raw.mood ?? undefined,
+            year: raw.year ?? undefined,
+        };
+
+        const filters = parsedPromptSchema.parse(normalized);
 
         const movies = await movieRepository.searchForAI(filters);
-
+        console.log("MOVIES FOUND:", movies.length);
+        if (movies.length === 0) {
+            return {
+                title: "No movies found",
+                reason: "No movies matched your filters.",
+                recommendations: [],
+            };
+        }
         const recommendation =
             await this.chatWithFallback(
                 RECOMMENDATION_PROMPT,
@@ -57,15 +89,40 @@ class AIServices {
             )
 
         try {
-            const result = recommendationSchema.parse(JSON.parse(recommendation))
+            const result = recommendationSchema.parse(extractJSON(recommendation))
+            const enrichedRecommendations = [];
+
+            for (const item of result.recommendations) {
+
+                const movie =
+                    movies.find(
+                        m =>
+                            m.title.toLowerCase() ===
+                            item.title.toLowerCase()
+                    );
+
+                if (movie) {
+
+                    enrichedRecommendations.push({
+                        ...movie,
+                        reason: item.reason
+                    });
+
+                }
+
+            }
             await cacheService.set(cacheKey, result, 3600)
             await auditService.logAIRecommendation(true, context);
-            return result;
+            return {
+                recommendations: enrichedRecommendations
+            };
         }
-        catch {
-            throw new Error(
-                "AI returned invalid JSON."
-            );
+        catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
+
+            throw error;
         }
     }
 

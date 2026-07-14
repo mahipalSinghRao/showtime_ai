@@ -2,9 +2,10 @@ import asyncHandler from "@/shared/utils/asyncHandler";
 import reviewService from "./review.service";
 import ApiResponse from "@/shared/utils/ApiResponse";
 import { getRequestContext } from "@/shared/context/request-context";
+import { Request, Response } from "express";
 
 class ReviewController {
-    createReview = asyncHandler(async (req, res) => {
+    createReview = asyncHandler(async (req: Request, res: Response) => {
         const result =
             await reviewService.createReview(
                 {
@@ -22,8 +23,8 @@ class ReviewController {
         );
     })
 
-    getMovieReviews = asyncHandler(async (req, res) => {
-        const movieId = req.params.id as string
+    getMovieReviews = asyncHandler(async (req: Request, res: Response) => {
+        const movieId = req.params.movieId as string
         const result = await reviewService.getMovieReviews(movieId);
         return res.status(200).json(
             new ApiResponse(
@@ -35,7 +36,7 @@ class ReviewController {
         );
     })
 
-    updateReview = asyncHandler(async (req, res) => {
+    updateReview = asyncHandler(async (req: Request, res: Response) => {
         const result =
             await reviewService.updateReview(
                 req.params.id as string,

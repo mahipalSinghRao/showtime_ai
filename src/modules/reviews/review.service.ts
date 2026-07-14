@@ -7,10 +7,22 @@ import { RequestContext } from "@/shared/context/request-context";
 
 class ReviewService {
     async createReview(data: CreateReviewDto, context?: RequestContext) {
+        const existingReview =
+            await reviewRepository.findByMovieAndUser(
+                data.movie,
+                data.user
+            );
+
+        if (existingReview) {
+            throw new ApiError(
+                409,
+                "You have already reviewed this movie."
+            );
+        }
         const review = await reviewRepository.create(data);
 
         await movieRepository.updateRating(data.movie.toString());
-        
+
         await auditService.logReviewCreate(
             true,
             context
@@ -25,7 +37,8 @@ class ReviewService {
     async updateReview(
         id: string,
         userId: string,
-        data: UpdateReviewDto
+        data: UpdateReviewDto,
+        context?: RequestContext
     ) {
 
         const review = await reviewRepository.findById(id);
@@ -36,9 +49,7 @@ class ReviewService {
                 "Review not found"
             );
         }
-        // console.log("Review User :", review.user.toString());
-        // console.log("Logged User :", userId);
-        // console.log("Equal ?", review.user.toString() === userId);
+
         if (review.user.toString() !== userId) {
             throw new ApiError(
                 403,
@@ -51,6 +62,11 @@ class ReviewService {
 
         await movieRepository.updateRating(
             review.movie.toString()
+        );
+
+        await auditService.logReviewCreate(
+            true,
+            context
         );
 
         return updatedReview;

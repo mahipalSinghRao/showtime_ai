@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const userUpdateSchema = z.object({
     body: z.object({
-        fullName: z.string().trim().min(3, "Full name must be at least 3 characters").max(50).optional(),
+        fullname: z.string().trim().min(3, "Full name must be at least 3 characters").max(80).optional(),
         avatar: z.string().url("Invalid  avatar url").optional()
     }),
 })

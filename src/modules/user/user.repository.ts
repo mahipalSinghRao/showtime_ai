@@ -36,8 +36,16 @@ class UserRepository {
         );
     }
 
-    async updateLastLogin(userId: string) {
-        return User.findByIdAndUpdate(userId, { lastLogin: new Date() }, { new: true })
+    async updateLastLogin(userId: string, data: UpdateUserDto) {
+        return User.findByIdAndUpdate(
+            userId,
+            data,
+            {
+                new: true,
+                runValidators: true,
+                select: "-password -refreshToken"
+            }
+        );
     }
 
     async existsByEmail(email: string) {

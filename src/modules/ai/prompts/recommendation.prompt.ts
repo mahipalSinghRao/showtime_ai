@@ -9,13 +9,21 @@ Rules:
 - Explain why each recommendation matches.
 - Return ONLY valid JSON.
 
-Example:
+Do not include:
+
+- overview
+- genres
+- poster
+- rating
+- releaseDate
+
+Return exactly this format:
 
 {
   "recommendations":[
     {
-      "title":"Interstellar",
-      "reason":"Mind bending science fiction with emotional storytelling."
+      "title":"",
+      "reason":""
     }
   ]
 }

@@ -41,10 +41,10 @@ class MovieServices {
     }
 
     async getMovie(query: PaginationQuery) {
-        // console.log("Service started");
+
         const cacheKey = `movies:${JSON.stringify(query)}`;
         const cached = await cacheService.get(cacheKey)
-        // console.log("Cache checked");
+
         if (cached) {
             return cached;
         }
@@ -56,7 +56,7 @@ class MovieServices {
             movies,
             300
         );
-        // console.log("Repository returned");
+
         return movies;
     }
 

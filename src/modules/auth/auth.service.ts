@@ -168,7 +168,7 @@ class AuthService {
 
     async getMe(userId: string) {
         const user = await userRepository.findById(userId)
-        console.info(user)
+
         if (!user) {
             throw new ApiError(401, "Unauthorized");
         }

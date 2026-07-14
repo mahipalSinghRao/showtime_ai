@@ -37,6 +37,12 @@ class WatchlistService {
         context?: RequestContext
     ) {
         const result = await watchlistRepository.remove(userId, movieId)
+        if (!result) {
+            throw new ApiError(
+                404,
+                "Movie not found in watchlist"
+            );
+        }
         await auditService.logWatchlistRemove(
             true,
             context
