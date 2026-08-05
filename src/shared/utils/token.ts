@@ -6,7 +6,8 @@ export const createTokenPayload = (
 ) => ({
     userId: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
+    jti: crypto.randomUUID()
 });
 
 export const hashToken = (token: string): string => {

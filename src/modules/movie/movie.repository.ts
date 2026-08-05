@@ -9,7 +9,7 @@ import { ParsedPrompt } from "../ai/ai.types";
 
 class MovieRepository {
     async createMany(data: CreateMovieDto[]) {
-        return Movie.bulkWrite(
+        const result = await Movie.bulkWrite(
             data.map((movie) => ({
                 updateOne: {
                     filter: {
@@ -22,6 +22,13 @@ class MovieRepository {
                 }
             }))
         );
+
+        console.log(
+            "Movie Count:",
+            await Movie.countDocuments()
+        );
+
+        return result;
     }
 
     async findAll(query: PaginationQuery) {
@@ -64,6 +71,11 @@ class MovieRepository {
                     },
                     averageRating: {
                         $avg: "$voteAverage"
+                    },
+                    trendingMovies: {
+                        $sum: {
+                            $cond: ["isTrending", 1, 0]
+                        },
                     }
                 }
             }
@@ -89,7 +101,6 @@ class MovieRepository {
             return [];
         }
 
-        console.log(movie.genres);
         return Movie.find({
             _id: { $ne: movie._id },
             genres: { $in: movie.genres }
@@ -125,41 +136,133 @@ class MovieRepository {
         await Movie.findByIdAndUpdate(
             movieId,
             {
-                voteAverage: stats[0].averageRating,
-                voteCount: stats[0].totalReviews
+                vote_average: stats[0].averageRating,
+                vote_count: stats[0].totalReviews
             }
         );
 
     }
 
     async searchForAI(filters: ParsedPrompt) {
-        const query: any = {};
+
+        const conditions: any[] = [];
+
         if (filters.genres?.length) {
-            query.genres = {
-                $in: filters.genres
-            };
+            conditions.push({
+                $or: filters.genres.map((genre) => ({
+                    genres: {
+                        $regex: new RegExp(`^${genre}$`, "i")
+                    }
+                }))
+            });
         }
+
         if (filters.language) {
-            query.originalLanguage = filters.language;
+            conditions.push({
+                originalLanguage: filters.language
+            });
         }
+
         if (filters.year) {
-            query.releaseDate = {
-                $gte: new Date(`${filters.year}-01-01`),
-                $lte: new Date(`${filters.year}-12-31`)
-            };
+            conditions.push({
+                releaseDate: {
+                    $gte: new Date(`${filters.year}-01-01`),
+                    $lte: new Date(`${filters.year}-12-31`)
+                }
+            });
+        }
+
+        if (filters.keywords?.length) {
+
+            const keywordConditions = [];
+
+            for (const keyword of filters.keywords) {
+
+                keywordConditions.push(
+
+                    {
+                        title: {
+                            $regex: keyword,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        overview: {
+                            $regex: keyword,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        genres: {
+                            $regex: keyword,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        productionCompanies: {
+                            $elemMatch: {
+                                $regex: keyword,
+                                $options: "i"
+                            }
+                        }
+                    },
+
+                    {
+                        "cast.name": {
+                            $regex: keyword,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        "crew.name": {
+                            $regex: keyword,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        tagline: {
+                            $regex: keyword,
+                            $options: "i"
+                        }
+                    }
+
+                );
+
+            }
+
+            conditions.push({
+                $or: keywordConditions
+            });
 
         }
-        if (filters.keywords?.length) {
-            query.$or = filters.keywords.map(keyword => ({
-                overview: {
-                    $regex: keyword,
-                    $options: "i"
-                }
-            }));
-        }
+
+        const query =
+            conditions.length > 0
+                ? { $and: conditions }
+                : {};
 
         return Movie.find(query)
-            .select("title overview genres voteAverage releaseDate posterPath")
+            .select(`
+                tmdbId
+title
+overview
+genres
+voteAverage
+releaseDate
+posterPath
+runtime
+trailerKey
+slug
+cast
+crew
+productionCompanies
+tagline
+`)
             .limit(10);
     }
 }

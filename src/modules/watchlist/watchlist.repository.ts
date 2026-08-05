@@ -7,12 +7,14 @@ class WatchlistRepository {
     }
 
     async findByUser(userId: string) {
-        return Watchlist.find({ user: userId })
+        const watchlist = Watchlist.find({ user: userId })
             .populate({
                 path: "movie",
                 select: "title posterPath voteAverage releaseDate"
             })
             .sort({ createdAt: -1 })
+            .lean();
+        return watchlist;
     }
 
     async remove(userId: string, movieId: string) {

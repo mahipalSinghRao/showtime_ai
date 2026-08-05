@@ -9,14 +9,22 @@ import cacheService from "@/shared/cache/cache.service";
 import auditService from "../audit/audit.service";
 import { RequestContext } from "@/shared/context/request-context";
 
+
 export function extractJSON(text: string) {
-    const match = text.match(/\{[\s\S]*\}/);
+
+    const cleaned = text
+        .replace(/<think>[\s\S]*?<\/think>/g, "")
+        .replace(/Thinking...[\s\S]*?done thinking\./g, "")
+        .trim();
+
+    const match = cleaned.match(/\{[\s\S]*\}/);
 
     if (!match) {
         throw new Error("No JSON found");
     }
 
     return JSON.parse(match[0]);
+
 }
 
 class AIServices {
@@ -25,6 +33,7 @@ class AIServices {
         userPrompt: string
     ): Promise<string> {
         const providers = aiFactory.getFallbackChain();
+
         let lastError: unknown;
 
         for (const provider of providers) {
@@ -58,7 +67,7 @@ class AIServices {
         }
 
         const parsedResponse = await this.chatWithFallback(PARSE_PROMPT, userPrompt)
-     
+
         const raw = extractJSON(parsedResponse);
 
         const normalized = {
@@ -70,8 +79,10 @@ class AIServices {
 
         const filters = parsedPromptSchema.parse(normalized);
 
+
+       
         const movies = await movieRepository.searchForAI(filters);
-        console.log("MOVIES FOUND:", movies.length);
+
         if (movies.length === 0) {
             return {
                 title: "No movies found",
@@ -79,43 +90,50 @@ class AIServices {
                 recommendations: [],
             };
         }
+
+        const movieContext = movies.map(movie => ({
+            tmdbId: movie.tmdbId,
+            title: movie.title,
+            genres: movie.genres,
+            overview: movie.overview,
+            voteAverage: movie.voteAverage,
+            releaseDate: movie.releaseDate
+        }));
+
         const recommendation =
             await this.chatWithFallback(
                 RECOMMENDATION_PROMPT,
                 JSON.stringify({
                     request: userPrompt,
-                    movies
+                    movies: movieContext
                 })
             )
-
+       
         try {
+
             const result = recommendationSchema.parse(extractJSON(recommendation))
+        
             const enrichedRecommendations = [];
 
             for (const item of result.recommendations) {
-
                 const movie =
                     movies.find(
-                        m =>
-                            m.title.toLowerCase() ===
-                            item.title.toLowerCase()
+                        m => m.tmdbId === item.tmdbId
                     );
 
                 if (movie) {
-
                     enrichedRecommendations.push({
-                        ...movie,
+                        ...movie.toObject(),
                         reason: item.reason
                     });
-
                 }
-
             }
-            await cacheService.set(cacheKey, result, 3600)
-            await auditService.logAIRecommendation(true, context);
-            return {
+            const response = {
                 recommendations: enrichedRecommendations
             };
+            await cacheService.set(cacheKey, response, 3600)
+            await auditService.logAIRecommendation(true, context);
+            return response;
         }
         catch (error) {
             if (error instanceof Error) {

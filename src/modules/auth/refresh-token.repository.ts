@@ -19,8 +19,14 @@ class RefreshTokenRepository {
     }
 
     async revoke(tokenHash: string) {
-        return RefreshToken.findByIdAndUpdate({ tokenHash },
-            { revoked: true })
+        return RefreshToken.findOneAndUpdate(
+            { tokenHash },
+            {
+                revoked: true,
+                revokedAt: new Date(),
+            },
+            { new: true, }
+        );
     }
 
     async revokeAll(userId: string) {
@@ -29,7 +35,7 @@ class RefreshTokenRepository {
                 user: userId,
                 revoked: false,
             },
-            { revoked: true, }
+            { revoked: true, revokedAt: new Date() }
         );
     }
 

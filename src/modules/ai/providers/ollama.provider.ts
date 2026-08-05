@@ -11,30 +11,50 @@ export class OllamaProvider implements AIProvider {
     ): Promise<string> {
 
         try {
-            console.log("1");
+            // console.log("1");
+            // const response = await axios.post(
+            //     `${OLLAMA_URL}/api/chat`,
+            //     {
+            //         model: "qwen3:4b",
+            //         format: "json",
+            //         messages: [
+            //             {
+            //                 role: "system",
+            //                 content: "You are a helpful assistant. Respond ONLY with valid JSON."
+            //             },
+            //             {
+            //                 role: "user",
+            //                 content: userPrompt + "\n\nDo not think. Respond immediately with JSON only."
+            //             }
+            //         ],
+            //         stream: false,
+            //     },
+            //     {
+            //         timeout: 120000,
+            //     }
+            // );
+
+            const prompt = [
+                systemPrompt,
+                "",
+                userPrompt
+            ].join("\n");
             const response = await axios.post(
-                `${OLLAMA_URL}/api/chat`,
+                `${OLLAMA_URL}/api/generate`,
                 {
-                    // model: "qwen3:4b",
                     model: "llama3.2:3b",
-                    messages: [
-                        {
-                            role: "system",
-                            content: systemPrompt,
-                        },
-                        {
-                            role: "user",
-                            content: userPrompt,
-                        },
-                    ],
+                    prompt,
                     stream: false,
+                    format: "json",
                 },
                 {
-                    timeout: 120000,
+                    timeout: 120000
                 }
             );
-           
-            return response.data.message.content;
+
+
+            return response.data.response;
+
         } catch (error: any) {
             throw new AIProviderError(
                 "Ollama",

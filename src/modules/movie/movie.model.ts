@@ -35,8 +35,8 @@ const movieSchema = new Schema<IMovie>({
         enum: Object.values(MovieStatus)
     },
     voteAverage: { type: Number, default: 0 },
-    voteCount: Number,
-    popularity: Number,
+    voteCount: { type: Number, default: 0 },
+    popularity: { type: Number, default: 0 },
     adult: { type: Boolean, default: false },
     trailerKey: String,
     cast: [{
@@ -65,14 +65,23 @@ const movieSchema = new Schema<IMovie>({
     isFeatured: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
     keywords: { type: [String], default: [] },
-    productionCompanies: [{ type: [String], default: [] }],
-    country: { type: [String], default: [] },
+    productionCompanies: {
+        type: [String],
+        default: [],
+    },
+    country: {
+        type: [String],
+        default: [],
+    },
     originalLanguage: String,
     tagline: { type: String, trim: true },
     homepage: { type: String, trim: true },
     imdbId: String,
     video: { type: Boolean, default: false },
-    originCountry: { type: [String], default: [] }
+    originCountry: {
+        type: [String],
+        default: [],
+    },
 }, { timestamps: true })
 
 movieSchema.index({

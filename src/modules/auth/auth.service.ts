@@ -27,11 +27,6 @@ class AuthService {
             ipAddress,
         })
 
-        // await userRepository.updateRefreshToken(
-        //     user.id,
-        //     tokens.refreshToken
-        // );
-
         return {
             user: toPublicUser(user),
             tokens

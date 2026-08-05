@@ -2,10 +2,16 @@ node_modules
 
 dist
 
-coverage
-
 .git
 
+.github
+
 .env
+
+coverage
+
+.vscode
+
+README.md
 
 npm-debug.log

@@ -7,12 +7,16 @@ export const mapTmdbMovieToMovie = (movie: TmdbMovie): CreateMovieDto => {
         title: movie.title,
         overview: movie.overview,
         posterPath: movie.poster_path,
-        releaseDate: new Date(),
+        releaseDate:
+            movie.release_date
+                ? new Date(movie.release_date)
+                : null,
         genres: [],
         originalLanguage: movie.original_language,
         runtime: 1,
-        slug: movie.title
+        slug: `${movie.title
             .toLowerCase()
-            .replace(/\s+/g, "-")
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-")}-${movie.id}`
     }
 }

@@ -10,7 +10,8 @@ export interface LoginUserDto {
 export interface jwtPayload {
     userId: string;
     email: string;
-    role: UserRole
+    role: UserRole;
+    jti?: string;
 }
 
 export interface AuthTokens {

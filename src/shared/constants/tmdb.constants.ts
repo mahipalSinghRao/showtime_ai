@@ -8,5 +8,11 @@ export enum TmdbMovieCategory {
 
     UPCOMING = "upcoming",
 
-    NOW_PLAYING = "now_playing"
+    NOW_PLAYING = "now_playing",
+}
+
+export enum TmdbDiscoverCategory {
+    DISCOVER = "discover",
+
+    TRENDING = "trending",
 }

@@ -8,8 +8,8 @@ export interface TmdbMovie {
     release_date: string;
     genre_ids: number[];
     original_language: string;
-    vote_average: number;
-    vote_count: number;
+    voteAverage: number;
+    voteCount: number;
     popularity: number;
     adult: boolean;
     video: boolean;

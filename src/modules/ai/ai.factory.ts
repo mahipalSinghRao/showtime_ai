@@ -5,9 +5,9 @@ import { GeminiProvider } from "./providers/gemini.provider";
 import { OllamaProvider } from "./providers/ollama.provider";
 
 export enum AIProviderType {
-    OPENAI = "openai",
-    GEMINI = "gemini",
     OLLAMA = "ollama",
+    GEMINI = "gemini",
+    OPENAI = "openai",
 }
 
 class AIProviderFactory {
@@ -16,14 +16,17 @@ class AIProviderFactory {
 
         switch (type) {
 
-            case AIProviderType.OPENAI:
-                return new OpenAIProvider();
+            case AIProviderType.OLLAMA:
+                return new OllamaProvider();
 
             case AIProviderType.GEMINI:
                 return new GeminiProvider();
 
-            case AIProviderType.OLLAMA:
-                return new OllamaProvider();
+            case AIProviderType.OPENAI:
+                return new OpenAIProvider();
+
+            default:
+                throw new Error("Provider disabled");
         }
     }
 
@@ -41,11 +44,11 @@ class AIProviderFactory {
 
         switch (selected) {
 
-            case AIProviderType.OPENAI:
+            case AIProviderType.OLLAMA:
                 return [
-                    this.createProvider(AIProviderType.OPENAI),
+                    this.createProvider(AIProviderType.OLLAMA),
                     this.createProvider(AIProviderType.GEMINI),
-                    this.createProvider(AIProviderType.OLLAMA)
+                    this.createProvider(AIProviderType.OPENAI)
                 ];
 
             case AIProviderType.GEMINI:
@@ -55,21 +58,22 @@ class AIProviderFactory {
                     this.createProvider(AIProviderType.OLLAMA)
                 ];
 
-            case AIProviderType.OLLAMA:
+            case AIProviderType.OPENAI:
+                return [
+                    this.createProvider(AIProviderType.OPENAI),
+                    this.createProvider(AIProviderType.GEMINI),
+                    this.createProvider(AIProviderType.OLLAMA)
+                ];
+
+            default:
                 return [
                     this.createProvider(AIProviderType.OLLAMA),
                     this.createProvider(AIProviderType.GEMINI),
                     this.createProvider(AIProviderType.OPENAI)
                 ];
-
-            default:
-                return [
-                    this.createProvider(AIProviderType.GEMINI),
-                    this.createProvider(AIProviderType.OPENAI),
-                    this.createProvider(AIProviderType.OLLAMA)
-                ];
         }
     }
 }
+
 
 export default new AIProviderFactory();

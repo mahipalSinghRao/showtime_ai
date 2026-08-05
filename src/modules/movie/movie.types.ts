@@ -7,7 +7,7 @@ export interface IMovie {
     overview: string;
     posterPath: string;
     backdropPath: string;
-    releaseDate: Date;
+    releaseDate: Date | null;
     genres: string[];
     runtime: number;
     status: string;
@@ -40,7 +40,7 @@ export interface CreateMovieDto {
     tmdbId: number;
     title: string;
     overview: string;
-    releaseDate: Date;
+    releaseDate: Date | null;
     genres: string[];
     originalLanguage: string;
     posterPath: string;
@@ -91,5 +91,13 @@ interface CrewMember {
     job: string;
     department: string;
 }
+
+export type MovieSyncSource =
+    | "popular"
+    | "top_rated"
+    | "upcoming"
+    | "now_playing"
+    | "discover"
+    | "trending";
 
 export type MovieDocument = HydratedDocument<IMovie>

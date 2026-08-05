@@ -50,10 +50,10 @@ router.get("/me", protect, authController.getMe);
  *             type: object
  *             properties:
  *               fullName:
- *                  type: string
+ *                 type: string
  *                 example: Mahipal Singh
- *                 avatar:
- *                  type: string
+ *               avatar:
+ *                 type: string
  *                 example: https://example.com/avatar.jpg
  *     responses:
  *       "200":
@@ -63,6 +63,11 @@ router.get("/me", protect, authController.getMe);
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.patch("/update", protect, validate(userUpdateSchema), userController.updateProfile);
+router.patch(
+    "/update",
+    protect,
+    validate(userUpdateSchema),
+    userController.updateProfile
+);
 
 export default router;

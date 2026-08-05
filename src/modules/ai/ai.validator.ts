@@ -11,7 +11,7 @@ export const parsedPromptSchema = z.object({
 export const recommendationSchema = z.object({
     recommendations: z.array(
         z.object({
-            title: z.string(),
+            tmdbId: z.number(),
             reason: z.string()
         })
     )

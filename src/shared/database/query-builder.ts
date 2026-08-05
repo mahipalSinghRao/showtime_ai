@@ -31,7 +31,7 @@ export class QueryBuilder<T> {
                 }
             }))
         }
-        this.query.find(this.filter);
+        this.query = this.query.find(this.mongoFilter);
         return this;
     };
     getFilter() {

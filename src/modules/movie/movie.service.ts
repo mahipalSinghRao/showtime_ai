@@ -6,39 +6,163 @@ import ApiError from "@/shared/errors/ApiError";
 import { PaginationQuery } from "@/shared/types/pagination.types";
 import { mapTmdbDetailsToMovie } from "../integrations/tmdb/tmdb-details.mapper";
 import cacheService from "@/shared/cache/cache.service";
-import { CreateMovieDto } from "./movie.types";
+import { CreateMovieDto, MovieSyncSource } from "./movie.types";
 import auditService from "../audit/audit.service";
+import pLimit from "p-limit";
 
 class MovieServices {
-    async syncMovies() {
-        const movies =
-            await tmdbService.getMovies(
-                TmdbMovieCategory.POPULAR
+    async syncMovies(
+        source: MovieSyncSource = "popular",
+        pages = 20
+    ) {
+
+        let totalMovies = 0;
+
+        for (let currentPage = 1; currentPage <= pages; currentPage++) {
+
+            let movies;
+
+            switch (source) {
+
+                case "popular":
+
+                    movies = await tmdbService.getMovies(
+                        TmdbMovieCategory.POPULAR,
+                        currentPage
+                    );
+                    break;
+
+                case "top_rated":
+
+                    movies = await tmdbService.getMovies(
+                        TmdbMovieCategory.TOP_RATED,
+                        currentPage
+                    );
+                    break;
+
+                case "upcoming":
+
+                    movies = await tmdbService.getMovies(
+                        TmdbMovieCategory.UPCOMING,
+                        currentPage
+                    );
+                    break;
+
+                case "now_playing":
+
+                    movies = await tmdbService.getMovies(
+                        TmdbMovieCategory.NOW_PLAYING,
+                        currentPage
+                    );
+                    break;
+
+                case "discover":
+                    movies = await tmdbService.discoverMovies(currentPage);
+
+                    console.log("TMDB Response:", movies.results?.length);
+
+                    break;
+
+                case "trending":
+
+                    movies = await tmdbService.getTrending(
+                        currentPage
+                    );
+
+                    break;
+
+                default:
+                    throw new ApiError(
+                        400,
+                        "Invalid movie source"
+                    );
+            }
+
+            const limit = pLimit(1);
+            const detailedMovies = await Promise.allSettled(
+                movies.results.map(movie =>
+                    limit(() => tmdbService.getMovieDetails(movie.id))
+                )
             );
-        const detailedMovies = await Promise.all(
-            movies.results.map((movie) => tmdbService.getMovieDetails(movie.id))
-        )
 
-        const mappedMovies: CreateMovieDto[] = movies.results.map((movie, index) => ({
-            ...mapTmdbMovieToMovie(movie),
-            ...mapTmdbDetailsToMovie(detailedMovies[index]),
+            const mappedMovies: CreateMovieDto[] =
+                movies.results.map((movie, index) => {
 
-            isFeatured: index < 5,
-            isTrending: index < 10,
-        }));
+                    const detailResult = detailedMovies[index];
 
+                    const details =
+                        detailResult.status === "fulfilled"
+                            ? detailResult.value
+                            : null;
 
-        await movieRepository.createMany(mappedMovies);
+                    if (detailResult.status === "rejected") {
+                        console.error(
+                            `Movie ${movie.id} failed`,
+                            detailResult.reason
+                        );
+                    }
+
+                    // const mapped = {
+                    //     ...mapTmdbMovieToMovie(movie),
+                    //     ...(details ? mapTmdbDetailsToMovie(details) : {})
+                    // };
+
+                    // console.log("==========");
+                    // console.log("TMDB");
+
+                    // console.dir(details, {
+                    //     depth: null
+                    // });
+
+                    // console.log("Mapped");
+
+                    // console.dir(mapped, {
+                    //     depth: null
+                    // });
+
+                    return {
+                        ...mapTmdbMovieToMovie(movie),
+
+                        ...(details
+                            ? mapTmdbDetailsToMovie(details)
+                            : {}),
+
+                        isFeatured: currentPage === 1 && index < 5,
+                        isTrending: currentPage === 1 && index < 10,
+                    };
+                });
+
+            await movieRepository.createMany(
+                mappedMovies
+            );
+
+            totalMovies += mappedMovies.length;
+        }
 
         await Promise.all([
-            cacheService.deleteByPattern("movies:*"),
-            cacheService.deleteByPattern("movie:*")
+
+            cacheService.deleteByPattern(
+                "movies:*"
+            ),
+
+            cacheService.deleteByPattern(
+                "movie:*"
+            )
+
         ]);
 
         await auditService.logMovieSync(true);
 
-        return mappedMovies;
+        return {
+            success: true,
+            source,
+            pages,
+            totalMovies,
+            message: `${totalMovies} movies synced successfully.`
+        };
+
     }
+
 
     async getMovie(query: PaginationQuery) {
 
@@ -118,13 +242,13 @@ class MovieServices {
         if (cached) {
             return cached;
         }
-        const tranding = await movieRepository.findTrending();
+        const trending = await movieRepository.findTrending();
         await cacheService.set(
             cacheKey,
-            tranding,
+            trending,
             600
         );
-        return tranding;
+        return trending;
     }
 
     async getSimilarMovies(id: string) {

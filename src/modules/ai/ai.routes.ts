@@ -33,7 +33,7 @@ const router = Router();
  *         $ref: '#/components/responses/InternalServerError'
  */
 
-router.post("/", aiController.recommend);
+router.post("/recommend", aiController.recommend);
 
 router.get("/test-ollama", async (_req, res) => {
     const provider = new OllamaProvider();

@@ -4,23 +4,28 @@ import movieService from "./movie.service";
 import { getMovieQueue } from "@/jobs/queues/movie.queue";
 import { PaginationQuery } from "@/shared/types/pagination.types";
 import { Request, Response } from "express";
+import { MovieSyncSource } from "./movie.types";
 
 class MovieController {
-    syncMovies = asyncHandler(async (_req, res: Response) => {
-        // console.log("Controller reached");
-        await getMovieQueue().add("sync", {
-            jobId: "movie-sync", attempts: 3,
+
+    syncMovies = asyncHandler(async (req, res: Response) => {
+        const source = (req.query.source as MovieSyncSource);
+        const page = Number(req.query.page) || 20;
+        await getMovieQueue().add("sync", { source, page }, {
+            jobId: `movie-sync-${source}-${page}-${Date.now()}`, attempts: 1,
             backoff: {
                 type: "exponential",
                 delay: 3000
-            }
+            },
+            removeOnComplete: true,
+            removeOnFail: 100,
         })
-        // console.log("Service returned");
+
         return res.status(202).json(
             new ApiResponse(
                 202,
-                "Movie sync started",
-                null
+                `${source} movie sync started`,
+                { source, page }
             )
         );
     })

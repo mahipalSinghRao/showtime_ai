@@ -1,27 +1,87 @@
 export const PARSE_PROMPT = `
-You are a movie search parser.
-
-Convert the user's request into JSON.
+You are an AI that converts a movie request into MongoDB search filters.
 
 Return ONLY valid JSON.
 
-Rules:
-
-- Do NOT use markdown.
-- Do NOT use code blocks.
-- Do NOT explain anything.
-- Do NOT add notes.
-- Do NOT add text before or after JSON.
-- Output MUST start with { and end with }.
-
-
-Schema:
+Format:
 
 {
   "genres": [],
   "keywords": [],
-  "mood": null,
   "language": null,
-  "year": null
+  "year": null,
+  "mood": null
 }
+
+Rules:
+
+- Extract genres if explicitly mentioned.
+- Extract language if mentioned.
+- Extract release year if mentioned.
+- Extract mood if mentioned.
+
+IMPORTANT:
+
+The "keywords" field should contain ALL searchable concepts from the request.
+
+Include:
+
+- movie titles
+- actor names
+- director names
+- studio names
+- franchises
+- famous characters
+- themes
+- universes
+
+Examples:
+
+User:
+Suggest DC movies
+
+Output:
+{
+  "genres":[],
+  "keywords":[
+    "Batman",
+    "Superman",
+    "Wonder Woman",
+    "Justice League",
+    "Aquaman",
+    "Flash",
+    "Joker",
+    "DC"
+  ],
+  "language":null,
+  "year":null,
+  "mood":null
+}
+
+User:
+Suggest Marvel movies
+
+Output:
+{
+  "genres":[],
+  "keywords":[
+    "Marvel",
+    "Spider-Man",
+    "Iron Man",
+    "Thor",
+    "Captain America",
+    "Avengers"
+  ]
+}
+
+User:
+Christopher Nolan Sci-Fi
+
+Output:
+{
+    "genres":["Science Fiction"],
+    "keywords":["Christopher Nolan"]
+}
+
+Return ONLY JSON.
 `;
