@@ -1,6 +1,6 @@
 import { Router } from "express";
 import aiController from "./ai.controller";
-import { OllamaProvider } from "./providers/ollama.provider";
+import { protect } from "@/shared/middlewares/auth.middleware";
 
 
 const router = Router();
@@ -33,17 +33,7 @@ const router = Router();
  *         $ref: '#/components/responses/InternalServerError'
  */
 
-router.post("/recommend", aiController.recommend);
+router.post("/recommend", protect, aiController.recommend);
 
-router.get("/test-ollama", async (_req, res) => {
-    const provider = new OllamaProvider();
-
-    const response = await provider.chat(
-        "You are a helpful assistant.",
-        "Say Hello"
-    );
-
-    res.json(response);
-});
 
 export default router;

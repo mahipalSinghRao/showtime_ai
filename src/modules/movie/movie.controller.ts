@@ -78,10 +78,10 @@ class MovieController {
         );
     })
 
-    getTrendingMovies = asyncHandler(async (_req, res: Response) => {
+    getTrendingMovies = asyncHandler(async (req: Request, res: Response) => {
 
         const result =
-            await movieService.getTrendingMovies();
+            await movieService.getTrendingMovies(req.query as PaginationQuery);
 
         return res.status(200).json(
             new ApiResponse(

@@ -6,13 +6,13 @@ export const requestBodies = {
                 schema: {
                     type: "object",
                     required: [
-                        "name",
+                        "fullName",
                         "username",
                         "email",
                         "password",
                     ],
                     properties: {
-                        name: {
+                        fullName: {
                             type: "string",
                             example: "Mahipal Singh",
                         },

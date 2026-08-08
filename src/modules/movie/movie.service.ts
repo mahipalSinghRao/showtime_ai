@@ -236,13 +236,14 @@ class MovieServices {
         return featured;
     }
 
-    async getTrendingMovies() {
+    async getTrendingMovies(query: PaginationQuery
+    ) {
         const cacheKey = "movies:trending";
         const cached = await cacheService.get(cacheKey)
         if (cached) {
             return cached;
         }
-        const trending = await movieRepository.findTrending();
+        const trending = await movieRepository.findTrending(query);
         await cacheService.set(
             cacheKey,
             trending,

@@ -89,10 +89,25 @@ class MovieRepository {
             .limit(10)
     }
 
-    async findTrending() {
-        return Movie.find({ isTrending: true })
+    async findTrending(query: PaginationQuery) {
+        const builder = new QueryBuilder<IMovie>(
+            Movie.find({ isTrending: true }),
+            query
+        );
+
+        const movies = await builder
+            .find()
             .sort({ popularity: -1 })
-            .limit(10);
+            .paginate();
+
+        const total = await Movie.countDocuments(builder.getFilter());
+
+        const { page, limit } = getPagination(query);
+
+        return {
+            movies,
+            pagination: getPaginationMeta(page, limit, total),
+        };
     }
 
     async findSimilar(id: string) {

@@ -8,11 +8,10 @@ export const movieWorker = new Worker(
     "movie-sync",
 
     async (job: Job<{ source: MovieSyncSource, page: number }>) => {
-        console.log("🔥 JOB RECEIVED", job.id, job.data);
+
         console.log("================================");
         console.log("WORKER STARTED");
-        console.log("================================");
-        console.log("🔥 INSIDE WORKER");
+
         logger.info(`Movie Sync Started (${job.data.source})`);
         console.log("Sync started", job.data);
         await movieService.syncMovies(job.data.source, job.data.page);

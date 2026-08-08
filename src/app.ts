@@ -17,7 +17,7 @@ import watchlistRoutes from "@/modules/watchlist/watchlist.routes"
 import recommendRoutes from "@/modules/ai/ai.routes"
 import systemRoutes from "@/modules/system/system.routes";
 import { swaggerSpec } from "./docs/swagger";
-import { aiLimiter, apiLimiter } from "@/shared/middlewares/rateLimit.middleware";
+import { aiLimiter, apiLimiter, authLimiter } from "@/shared/middlewares/rateLimit.middleware";
 import { env } from "./config/env";
 import { requestId } from "./shared/middlewares/requestId.middleware";
 import { requestLoggerMiddleware } from "./shared/middlewares/requestLogger.middleware";
@@ -55,7 +55,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 app.use("/", systemRoutes);
-app.use("/api/v1/auth", authRoutes)
+app.use("/api/v1/auth", authLimiter, authRoutes)
 app.use("/api/v1/user", userRoutes)
 app.use("/api/v1/movies", movieRoutes)
 app.use("/api/v1/reviews", reviewRoutes);
