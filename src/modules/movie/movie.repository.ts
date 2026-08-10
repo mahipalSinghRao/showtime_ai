@@ -90,14 +90,14 @@ class MovieRepository {
     }
 
     async findTrending(query: PaginationQuery) {
-        const builder = new QueryBuilder<IMovie>(
+        const builder = new QueryBuilder(
             Movie.find({ isTrending: true }),
-            query
+            query,
+            { isTrending: true }
         );
+        builder.paginate();
 
-        const movies = await builder
-            .sort(["popularity"])
-            .paginate();
+        const movies = await builder.build().exec()
 
         const total = await Movie.countDocuments(builder.getFilter());
 

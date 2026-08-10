@@ -7,7 +7,7 @@ export class QueryBuilder<T> {
     constructor(
         private query: Query<T[], T>,
         private queryString: PaginationQuery,
-        private mongoFilter = {},
+        private mongoFilter: Record<string, any> = {},
     ) { }
     paginate() {
         const { skip, limit } = getPagination(this.queryString)
