@@ -2,11 +2,6 @@ import { Router } from "express";
 import movieController from "./movie.controller";
 import { validate } from "@/shared/middlewares/validate.middleware";
 import { movieQuerySchema } from "./movie.validator";
-// import tmdbService from "../integrations/tmdb/tmdb.service";
-// import axios from "axios";
-import { env } from "@/config/env";
-// import { authorize } from "@/shared/middlewares/role.middleware";
-
 
 const router = Router()
 
@@ -107,62 +102,6 @@ router.get("/featured", movieController.getFeaturedMovies);
  */
 
 router.get("/trending", movieController.getTrendingMovies);
-
-// router.get("/testTMDB", async (req, res) => {
-//     try {
-//         const response = await axios.get(
-//             "https://api.themoviedb.org/3/discover/movie",
-//             {
-//                 headers: {
-//                     Authorization: `Bearer ${env.TMDB_API_KEY}`,
-//                     Accept: "application/json",
-//                 },
-//                 params: {
-//                     page: 1,
-//                     sort_by: "popularity.desc",
-//                 },
-//             }
-//         );
-
-//         res.json({
-//             success: true,
-//             status: response.status,
-//             totalResults: response.data.total_results,
-//             firstMovie: response.data.results[0],
-//         });
-//     } catch (error: any) {
-//         res.status(500).json({
-//             success: false,
-//             message: error.message,
-//             code: error.code,
-//             status: error.response?.status,
-//             data: error.response?.data,
-//         });
-//     }
-// });
-
-router.get("/test-fetch", async (_req, res) => {
-    try {
-        for (let i = 0; i < 20; i++) {
-            const r = await fetch(
-                "https://api.themoviedb.org/3/discover/movie?page=1",
-                {
-                    headers: {
-                        Authorization: `Bearer ${env.TMDB_API_KEY}`,
-                        Accept: "application/json",
-                    },
-                }
-            );
-
-            console.log(i, r.status);
-        }
-
-        res.send("done");
-    } catch (e) {
-        console.error(e);
-        res.status(500).send(e);
-    }
-});
 
 
 /**

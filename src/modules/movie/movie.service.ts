@@ -59,8 +59,6 @@ class MovieServices {
                 case "discover":
                     movies = await tmdbService.discoverMovies(currentPage);
 
-                    console.log("TMDB Response:", movies.results?.length);
-
                     break;
 
                 case "trending":
@@ -102,23 +100,6 @@ class MovieServices {
                         );
                     }
 
-                    // const mapped = {
-                    //     ...mapTmdbMovieToMovie(movie),
-                    //     ...(details ? mapTmdbDetailsToMovie(details) : {})
-                    // };
-
-                    // console.log("==========");
-                    // console.log("TMDB");
-
-                    // console.dir(details, {
-                    //     depth: null
-                    // });
-
-                    // console.log("Mapped");
-
-                    // console.dir(mapped, {
-                    //     depth: null
-                    // });
 
                     return {
                         ...mapTmdbMovieToMovie(movie),
@@ -238,7 +219,10 @@ class MovieServices {
 
     async getTrendingMovies(query: PaginationQuery
     ) {
-        const cacheKey = "movies:trending";
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
+        const cacheKey = `movies:trending:page:${page}:limit:${limit}`;
+
         const cached = await cacheService.get(cacheKey)
         if (cached) {
             return cached;

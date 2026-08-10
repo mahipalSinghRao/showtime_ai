@@ -65,7 +65,6 @@ class TmdbService {
     }
 
     async discoverMovies(page = 1) {
-        console.log("🔥 fetch() entered");
         return this.fetch<TmdbMovieResponse>(
             "/discover/movie",
             {

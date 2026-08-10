@@ -96,8 +96,7 @@ class MovieRepository {
         );
 
         const movies = await builder
-            .find()
-            .sort({ popularity: -1 })
+            .sort(["popularity"])
             .paginate();
 
         const total = await Movie.countDocuments(builder.getFilter());
