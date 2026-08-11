@@ -34,9 +34,10 @@ app.use(helmet({
 }));
 app.use(
     cors({
-        origin: process.env.NODE_ENV === "production"
-            ? env.CLIENT_URL
-            : env.DOMIN_URL,
+        origin:
+            env.NODE_ENV === "production"
+                ? env.CLIENT_URL
+                : env.DOMIN_URL,
 
         credentials: true,
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
