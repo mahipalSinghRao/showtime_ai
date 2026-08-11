@@ -53,8 +53,15 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
 
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.get("/health", (_req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "ShowTime AI API is healthy",
+    });
+});
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/", systemRoutes);
 app.use("/api/v1/auth", authLimiter, authRoutes)
