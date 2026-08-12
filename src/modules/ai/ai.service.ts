@@ -80,7 +80,7 @@ class AIServices {
         const filters = parsedPromptSchema.parse(normalized);
 
 
-       
+
         const movies = await movieRepository.searchForAI(filters);
 
         if (movies.length === 0) {
@@ -108,11 +108,11 @@ class AIServices {
                     movies: movieContext
                 })
             )
-       
+
         try {
 
             const result = recommendationSchema.parse(extractJSON(recommendation))
-        
+
             const enrichedRecommendations = [];
 
             for (const item of result.recommendations) {

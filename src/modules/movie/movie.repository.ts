@@ -90,18 +90,21 @@ class MovieRepository {
     }
 
     async findTrending(query: PaginationQuery) {
-        const builder = new QueryBuilder(
-            Movie.find({ isTrending: true }),
-            query,
-            { isTrending: true }
-        );
-        builder.paginate();
+        const { page, limit, skip } = getPagination(query);
 
-        const movies = await builder.build().exec()
+        const filter = {
+            isTrending: true,
+        };
 
-        const total = await Movie.countDocuments(builder.getFilter());
+        const [movies, total] = await Promise.all([
+            Movie.find(filter)
+                .sort({ popularity: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
 
-        const { page, limit } = getPagination(query);
+            Movie.countDocuments(filter),
+        ]);
 
         return {
             movies,

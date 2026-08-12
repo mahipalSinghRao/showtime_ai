@@ -11,29 +11,6 @@ export class OllamaProvider implements AIProvider {
     ): Promise<string> {
 
         try {
-            // console.log("1");
-            // const response = await axios.post(
-            //     `${OLLAMA_URL}/api/chat`,
-            //     {
-            //         model: "qwen3:4b",
-            //         format: "json",
-            //         messages: [
-            //             {
-            //                 role: "system",
-            //                 content: "You are a helpful assistant. Respond ONLY with valid JSON."
-            //             },
-            //             {
-            //                 role: "user",
-            //                 content: userPrompt + "\n\nDo not think. Respond immediately with JSON only."
-            //             }
-            //         ],
-            //         stream: false,
-            //     },
-            //     {
-            //         timeout: 120000,
-            //     }
-            // );
-
             const prompt = [
                 systemPrompt,
                 "",
@@ -56,6 +33,13 @@ export class OllamaProvider implements AIProvider {
             return response.data.response;
 
         } catch (error: any) {
+            console.error("❌ Ollama request failed:", {
+                url: `${OLLAMA_URL}/api/generate`,
+                message: error?.message,
+                code: error?.code,
+                response: error?.response?.data,
+            });
+
             throw new AIProviderError(
                 "Ollama",
                 error instanceof Error

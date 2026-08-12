@@ -108,8 +108,13 @@ class MovieServices {
                             ? mapTmdbDetailsToMovie(details)
                             : {}),
 
-                        isFeatured: currentPage === 1 && index < 5,
-                        isTrending: currentPage === 1 && index < 10,
+                        isFeatured:
+                            source === "popular" &&
+                            currentPage === 1 &&
+                            index < 20,
+
+                        isTrending:
+                            source === "trending",
                     };
                 });
 
@@ -219,8 +224,8 @@ class MovieServices {
 
     async getTrendingMovies(query: PaginationQuery
     ) {
-        const page = Number(query.page) || 1;
-        const limit = Number(query.limit) || 10;
+        const page = Number(query.page);
+        const limit = Number(query.limit);
         const cacheKey = `movies:trending:page:${page}:limit:${limit}`;
 
         const cached = await cacheService.get(cacheKey)
